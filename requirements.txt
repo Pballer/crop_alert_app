@@ -1,0 +1,6 @@
+Flask
+tensorflow
+requests
+numpy
+gunicorn
+imageio
