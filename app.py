@@ -13,6 +13,7 @@ from coffee_prediction import make_prediction
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server # the Flask app
 
 model = keras.models.load_model('coffee.h5')
 
