@@ -1,57 +1,89 @@
-import os
-from flask import Flask, flash, request, redirect, url_for, send_from_directory
-from werkzeug.utils import secure_filename
-from os.path import join, dirname, realpath
-from tensorflow import keras
+import base64
+import datetime
+import io
 
+import dash
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+import dash_html_components as html
+from PIL import Image
+from tensorflow import keras
 from coffee_prediction import make_prediction
 
-UPLOAD_FOLDER = join(dirname(realpath(__file__)), 'uploads/')
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+model = keras.models.load_model('coffee.h5')
 
-model = keras.models.load_model('coffee.h5')  
-
-def allowed_file(filename):
-    return ('.' in filename and 
-            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            prediction = make_prediction('uploads/' + filename, model)
-            return prediction
-            #ffwd(['uploads/' + filename], ['results/' + filename], batch_size=1)
-            #return redirect(url_for('uploaded_file',
-            #                        filename=filename))
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+app.layout = html.Div([
+    dcc.Upload(
+        id='upload-data',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select Files')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+    ),
+    html.Div(id='output-data-upload'),
+])
 
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory('results/', filename)
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'image' in content_type:
+            image = Image.open(io.BytesIO(decoded))
+            image = image.resize((224, 224))
+            prediction = make_prediction(image, model)
+
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    return html.Div([
+        html.H5(prediction),
+        html.Img(src=contents,
+                 style={
+                    'height' : '25%',
+                    'width' : '25%',
+                    #'float' : 'right',
+                    'position' : 'relative',
+                    'padding-top' : 0,
+                    'padding-right' : 0
+                }),
+        html.H5(filename),
+        html.H6(datetime.datetime.fromtimestamp(date)),
+        html.Hr(),
+    ])
+
+
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'contents')],
+              [State('upload-data', 'filename'),
+               State('upload-data', 'last_modified')])
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
+
+
+if __name__ == '__main__':
+    app.run_server(debug=False)

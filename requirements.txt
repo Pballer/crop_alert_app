@@ -4,3 +4,5 @@ requests
 numpy
 gunicorn
 imageio
+flask-bootstrap
+dash
