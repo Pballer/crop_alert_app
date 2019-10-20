@@ -28,7 +28,7 @@ app.layout = html.Div([
         #]),
         style={
             #'width': '100%',
-            'height': '60px',
+            'height': '120px',
             'lineHeight': '60px',
             'borderWidth': '1px',
             #'borderStyle': 'dashed',
@@ -47,7 +47,7 @@ app.layout = html.Div([
     ),
 
     html.Div(id='output-data-upload', ),# className='content-container'),
-],) #style={'background-image': 'url(https://i.imgur.com/oOfouhD.jpg)',
+], className='content') #style={'background-image': 'url(https://i.imgur.com/oOfouhD.jpg)',
    #       'background-repeat': 'no-repeat',
    #       'background-position': 'center'} ) #className='background')
 
@@ -69,20 +69,20 @@ def parse_contents(contents, filename, date):
         ])
 
     return html.Div([
-        html.H5(prediction),
+        html.H2(prediction),
         html.Img(src=contents,
                  style={
                     'height' : '25%',
                     'width' : '25%',
                     #'float' : 'right',
-                    'position' : 'relative',
+                    'position' : 'center',
                     'padding-top' : 0,
                     'padding-right' : 0
                 }),
         html.H5(filename),
-        html.H6(datetime.datetime.fromtimestamp(date)),
-        html.Hr(),
-    ])
+        html.H6(datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')),
+        #html.Hr(),
+    ], className='example-container')
 
 
 @app.callback(Output('output-data-upload', 'children'),
