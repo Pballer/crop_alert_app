@@ -46,8 +46,8 @@ app.layout = html.Div([
         multiple=True
     ),
 
-    html.Div(id='output-data-upload', ),# className='content-container'),
-], className='content') #style={'background-image': 'url(https://i.imgur.com/oOfouhD.jpg)',
+    html.Div(id='output-data-upload', className='content-container container'),
+], className='background') #style={'background-image': 'url(https://i.imgur.com/oOfouhD.jpg)',
    #       'background-repeat': 'no-repeat',
    #       'background-position': 'center'} ) #className='background')
 
@@ -72,12 +72,17 @@ def parse_contents(contents, filename, date):
         html.H2(prediction),
         html.Img(src=contents,
                  style={
-                    'height' : '25%',
-                    'width' : '25%',
+                    #'flex-shrink': 0,
+                     'max-width': '100%',
+                     'max-height': '100%',
+                     #'display': 'flex',
+                     #'overflow': 'hidden',
+                    'height' : 'auto',
+                    'width' : 'auto',
                     #'float' : 'right',
-                    'position' : 'center',
-                    'padding-top' : 0,
-                    'padding-right' : 0
+                    #'position' : 'center',
+                    #'padding-top' : 0,
+                    #'padding-right' : 0
                 }),
         html.H5(filename),
         html.H6(datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')),
