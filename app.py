@@ -34,6 +34,7 @@ app.layout = html.Div([
             ], className='links'),
         ], className='container-width', style={'height': '100%'}),
     ], className='header'),
+
     html.Div([
         html.H1('Upload a picture of your coffee plant!'),
         dcc.Upload(
@@ -53,22 +54,18 @@ app.layout = html.Div([
                 'borderRadius': '5px',
                 'textAlign': 'center',
                 'margin': '10px',
-                'background-image': 'url(static/camera_icon.png)', #'url(https://png2.cleanpng.com/sh/86c39b36cbc59bde176d8f6d2f986a53/L0KzQYm3UsA2N6F2iZH0aYP2gLBuTfNidZZ3eZ9yY3BxPcX5gf50eJJ3fdD9LXPkfbb5gb1qa5DzReJ3Zz24cYiCUPQzaZY1S9Q6Mj60QYi7V8IyQGI6SakDOEK5RoeCUcg2NqFzf3==/kisspng-camera-icon-transparent-camera-icon-png-5a790d2ae03b12.1174721815178826669185.png)',
+                'background-image': 'url(static/camera_icon.png)',
                 'background-repeat': 'no-repeat',
                 'background-position': 'center',
                 'background-size': 'contain',
-                #'background-attachment': 'fixed',
-
             },
-            # Allow multiple files to be uploaded
             multiple=True
         ),
-
-        html.Div(id='output-data-upload', ), #className='container'),
+        dcc.Loading(id="loading-1", children=[html.Div(id="output-data-upload")], type="cube"),
+        #html.Div(id='output-data-upload', ),
     ], className='content-container container-width content', id='chapter'),
-], className='background') #, style={'background-image': 'url(https://i.imgur.com/oOfouhD.jpg)'})
-   #       'background-repeat': 'no-repeat',
-   #       'background-position': 'center'} ) #className='background')
+], className='background', id='wait-for-layout')
+
 
 disease_info = {
     'Rust' : html.A('What is Rust?', target='_blank',
@@ -79,16 +76,14 @@ disease_info = {
                className='link'),
 }
 
+
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
-
     decoded = base64.b64decode(content_string)
-    try:
-        if 'image' in content_type:
-            image = Image.open(io.BytesIO(decoded))
-            image = image.resize((224, 224))
-            prediction = make_prediction(image, model)
 
+    try:
+        image = Image.open(io.BytesIO(decoded))
+        prediction = make_prediction(image, model)
     except Exception as e:
         print(e)
         return html.Div([

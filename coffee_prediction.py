@@ -18,6 +18,7 @@ prediction_label = {0: "Healthy", 1: "Red Spider Mite", 2: "Rust"}
 
 
 def make_prediction(image, model):
+    image = image.resize((224, 224))
     image_array = keras.preprocessing.image.img_to_array(image)
     x = np.expand_dims(image_array, axis=0)
     images = np.vstack([x])
