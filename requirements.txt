@@ -6,3 +6,4 @@ gunicorn
 imageio
 flask-bootstrap
 dash
+Pillow

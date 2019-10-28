@@ -10,15 +10,12 @@ from PIL import Image
 from tensorflow import keras
 from coffee_prediction import make_prediction
 
-external_stylesheets = [#'https://codepen.io/chriddyp/pen/bWLwgP.css',
-                        'static/code_pen.css',
-                        'https://dash.plot.ly/assets/override.css?m=1571412266.0',
-                        #'static/dash_override.css'
-                        ]
+external_stylesheets = ['static/code_pen.css',
+                        'https://dash.plot.ly/assets/override.css?m=1571412266.0', ]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = 'Crop Alert!'
-server = app.server # the Flask app
+server = app.server  # the Flask app
 
 model = keras.models.load_model('coffee.h5')
 
@@ -39,13 +36,7 @@ app.layout = html.Div([
         html.H1('Upload a picture of your coffee plant!'),
         dcc.Upload(
             id='upload-data',
-            #className='content-container container',
-            #children=html.Div([
-                #'Drag and Drop or ',
-            #    html.A('Take a Picture!')
-            #]),
             style={
-                #'width': '100%',
                 'height': '120px',
                 'lineHeight': '60px',
                 'borderWidth': '1px',
@@ -61,7 +52,7 @@ app.layout = html.Div([
             },
             multiple=True
         ),
-        dcc.Loading(id="loading-1", children=[html.Div(id="output-data-upload")], type="cube"),
+        dcc.Loading(id="loading-1", children=[html.Div(id="output-data-upload")], type="default"),
         #html.Div(id='output-data-upload', ),
     ], className='content-container container-width content', id='chapter'),
 ], className='background', id='wait-for-layout')
@@ -94,24 +85,16 @@ def parse_contents(contents, filename, date):
         html.H2(prediction),
         html.Img(src=contents,
                  style={
-                    #'flex-shrink': 0,
                      'max-width': '100%',
                      'max-height': '100%',
-                     #'display': 'flex',
-                     #'overflow': 'hidden',
                     'height' : 'auto',
                     'width' : 'auto',
-                    #'float' : 'right',
-                    #'position' : 'center',
-                    #'padding-top' : 0,
-                    #'padding-right' : 0
                 }),
         html.P(),
         disease_info.get(prediction, html.Div()),
         html.Hr(),
         html.P(filename),
         html.P(datetime.datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')),
-        #html.Hr(),
     ], className='example-container')
 
 
